@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>CTumor Tumor Detection</title>
+        <link rel="stylesheet" href="/static/style.css" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Waterfall&display=swap"
+            rel="stylesheet"
+        />
+       
+    </head>
+    <body>
+        <div class="maintitle">
+            <h1>CTUMOR</h1>
+        </div>
+
+        <div class="navigation">
+            <a href="{{ url_for('history') }}" class="nav-link" id="history">History</a>
+            
+            <a href="{{ url_for('logout') }}" class="nav-link" id="logout">Logout</a>
+        </div>
+
+        <div class="maincontainer">
+            <div class="container1">
+                <h2>Upload Photo</h2>
+                <form
+                    id="uploadForm"
+                    enctype="multipart/form-data"
+                    class="upload-box"
+                >
+                    <input
+                        type="file"
+                        id="fileInput"
+                        name="image"
+                        accept="image/*"
+                        required
+                    />
+                    <br /><br />
+                    <button type="submit">Process</button>
+                </form>
+            </div>
+
+            <div class="container2">
+                <h2>Result Prediction</h2>
+                <div class="result-section">
+                    <img id="uploadedImage" style="display: none" />
+                    <div class="result" id="result"></div>
+                    <div class="confidence-display" id="confidence" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <h2>Made In 2024</h2>
+        </footer>
+
+        <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+        <script>
+            const form = document.getElementById("uploadForm");
+            const fileInput = document.getElementById("fileInput");
+            const resultDiv = document.getElementById("result");
+            const confidenceDiv = document.getElementById("confidence");
+            const uploadedImage = document.getElementById("uploadedImage");
+
+            const socket = io();
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                const file = fileInput.files[0];
+                if (!file) {
+                    resultDiv.textContent = "Please select an image file.";
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("image", file);
+
+                
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    uploadedImage.src = e.target.result;
+                    uploadedImage.style.display = "block";
+                };
+                reader.readAsDataURL(file);
+
+                
+                resultDiv.textContent = "Processing...";
+                confidenceDiv.style.display = "none";
+
+                fetch("/predict", {
+                    method: "POST",
+                    body: formData,
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        resultDiv.textContent = data.result;
+                        
+                        if (data.confidence) {
+                            confidenceDiv.textContent = `Confidence: ${data.confidence}`;
+                            confidenceDiv.style.display = "block";
+                        }
+                    })
+                    .catch((error) => {
+                        resultDiv.textContent = "Error: Unable to process the image.";
+                        confidenceDiv.style.display = "none";
+                    });
+            });
+        </script>
+    </body>
+</html>

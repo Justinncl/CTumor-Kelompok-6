@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkup History - CTumor</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Waterfall&display=swap" rel="stylesheet">
+    <style>
+        
+    </style>
+</head>
+<body>
+    <!-- <div class="maintitle">
+        <h1>CTUMOR</h1>
+    </div> -->
+
+    <div class="navigation">
+        <a href="{{ url_for('index') }}" class="nav-link">← Back to Scanner</a>
+        
+        <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>
+    </div>
+
+    <div class="history-container">
+        <div class="history-header">
+            <h1>Your Checkup History</h1>
+            <p>Track your brain tumor detection results over time</p>
+        </div>
+
+        {% if checkups %}
+            <div class="checkup-grid">
+                {% for checkup in checkups %}
+                <div class="checkup-card">
+                    <img src="{{ checkup[0] }}" alt="Checkup Image" class="checkup-image">
+                    
+                    <div class="checkup-date">
+                        {{ checkup[3] }}
+                    </div>
+                    
+                    <div class="checkup-result {% if 'No Tumor' in checkup[1] %}result-negative{% else %}result-positive{% endif %}">
+                        {{ checkup[1] }}
+                    </div>
+                    
+                    {% if checkup[2] %}
+                    <div class="confidence-score">
+                        Confidence: {{ "%.1f%%" | format(checkup[2] * 100) }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-history">
+                <h3>No checkups yet</h3>
+                <p>Upload your first brain scan to start tracking your results!</p>
+                <a href="{{ url_for('index') }}" class="nav-link" style="display: inline-block; margin-top: 15px;">
+                    Start Your First Checkup
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <footer>
+        <h2>Made In 2024</h2>
+    </footer>
+</body>
+</html>
